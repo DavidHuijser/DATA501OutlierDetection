@@ -1,0 +1,222 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-08-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo=FALSE}
+# Now we need create a package to detect outliers
+# 1. Generate data with a few outliers
+slope <-  4
+offset <- -3
+sds <- 7
+x <- seq(from = 1, to = 10, length.out= 100)
+
+y <- slope*x + offset
+
+# Add regular noise
+noise <- rnorm(length(x),sd=2)
+y <- y + noise
+
+# generate number of outliers
+num <- 3
+s <- sample(length(x), num)
+y[s] <- y[s] +  rnorm(num, sd=sds) + runif(num, -sds,sds)
+index <- seq(size)
+
+# Create plot
+df <- data.frame(x,y,index)
+
+
+#ggplot(data=df, aes(x=x, y=y)) +
+#geom_point()
+```
+
+## Introduction 
+
+Our intention is to create an R-package for detected outliers to linear models. I would like to use as little external packages as possible and for educational purposes dive a bit into the linear algebra in of linear models.I assume everyone have seen in their undergrad courses how find a linear model using an R package `lm` or `glm`.  I assume you have seen the equation that describes a linear model
+$$
+y = \beta_0 + \beta_1 x  + e
+$$
+where $y$ is the dependent variable,  $x$ is the independent variable, $a$ is the slope and $b$ is the offset. However, if we use proper notation, we acknowledge that x and y are vectors and each values has an error associated with.  Therefore we get a the following
+$$
+\mathbf{y} = \beta_0 \mathbf{x}  + \beta_1 
+$$
+or in matrix form
+$$
+\mathbf{y} = \mathbf{X}\mathbf{\beta}
+$$
+where $\mathbf{X}$ is a matrix $[\mathbf{1} \qquad \mathbf{x}]$. 
+Our estimate of $\mathbf{\hat{\beta}}$ can be found directly
+$$
+\mathbf{\hat{\beta}} =  (X^T X)^{-1} X^T y
+$$
+This will give vector $\beta^T = [\beta_0 \quad \beta_1]$. It's easy to use this instead of `lm`, because some of the other quantities we need later, can be found directly using linear algebra.
+
+Finding $\beta$ in `R` is straight forward.
+```{r}
+# Solve linear fit 
+library(Matrix)
+
+n <- length(x)
+Y <- as.matrix(y)
+X <- cbind(rep(1,length(x)), x)   
+XtX <- t(X) %*% X
+# Use solve to calculates the inverse
+beta <- solve(XtX)%*%t(X)%*%Y
+offset_estimate <- beta[1]  
+slope_estimate <- beta[2]  
+
+# Compare our solution with lm 
+model <- lm(y~x)
+
+# compare square residuals of LA methods with LA package
+residuals <- y - (slope_estimate*x + offset_estimate)  
+sum(residuals**2)
+model$coefficients
+sum(model$residuals**2)
+
+#Identical 
+```
+
+## Quantities to use 
+
+There are a few quantities we will need.  We know the least-square residuals 
+$$
+e_i = y_i - \hat{y}
+$$
+and the SSE
+$$
+SSE = \sum_{i=1}^n e_i^2
+$$
+
+We can use this to calculate the estimate of $\simga^2$
+$$
+\hat{\sigma} = \frac{SSE}{n-p-1} = \frac{\mathbf{e}^T\mathbf{e}}{n-p-1} 
+$$
+where $n$ is the number of observations and $p$ the number of variables (in our case $p=1$). 
+The next quantity we need is the so-called projection matrix defined as 
+$$
+\mathbf{P} = \mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T 
+$$
+
+The elements on the diagonal,$ p{ii}$ are called the leverage values for the ith observations. 
+These are also needed to calculate the studentized residuals
+$$
+r_i = \frac{e_i}{\hat{\sigma}\sqrt{1-p_{ii}}}
+$$
+We implemented this are `R`
+
+```{r}
+# Residuals 
+residuals <- y - (slope_estimate*x + offset_estimate)  
+
+
+#  Projection matrix
+P <- X %*%solve(XtX)%*%t(X)
+
+# Leverage P
+pii <- diag(P)  
+
+# Estimate of sigma 
+sigma_hat <- as.numeric(sqrt(t(residuals)%*%residuals/(n-2)))
+
+# Studentize Residuals 
+studentsized_residuals  <- residuals/(sigma_hat*sqrt(1-pii))
+#z <- residuals/(sigma_hat*sqrt(1-pii))
+
+```
+
+## Cooks Distance
+
+The first quantity we want to look at is the Cook distance:
+
+$$
+C = \frac{r_i^2}{p+1}\times \frac{p_{ii}}{1-p_{ii}}
+$$
+which is straight forward in `R`
+```{r, out.width="50%"}
+#my_cooks_distance <- (0.5*studentsized_residuals**2)*(pii/(1-pii))
+
+my_cooks_distance <- (0.5*studentsized_residuals**2)*(pii/(1-pii))
+
+# Compare with cooksplot with Olsrr packages side by side 
+model <- lm(y~x)
+temp  <-cooks.distance(model)
+
+plot(x,as.vector(temp), col="red",alpha = 0.5); points(x,as.vector(my_cooks_distance),pch=3)
+
+```
+```{r}
+library(olsrr)
+library(ggplot2)
+ols_plot_cooksd_chart(model)+
+geom_point(y=as.vector(my_cooks_distance))
+```
+
+
+The second measure is Welsch and Kuh Measure (DFITS), define as 
+$$
+DFITS_i = r^*_i \sqrt{\frac{p_{ii}}{1-p_{ii}}}
+$$
+where the standardized residual $r^*_i$ are defined as
+$$
+r^*_i = \frac{e_i}{\hat{\sigma}_{(i)}\sqrt{1-p_{ii}}}
+$$
+using the \textbf{externalized} studentized residuals
+$$
+\hat{\sigma}^2_{(i)}=\frac{SSE_{(i)}}{n-p-2}
+$$
+
+
+```{r}
+SSE_i <- rep(0, n)
+for (i in 1:n){
+ tempbool <- rep(T, n)
+ tempbool[i] <- F
+ SSE_i[i]  <- as.numeric(sqrt(  (t(residuals[tempbool])%*%residuals[tempbool])/(n-3)))
+       
+}
+
+ext_studentsized_residuals  <- residuals/(SSE_i*sqrt(1-pii))
+
+DFITS <- ext_studentsized_residuals*sqrt(pii/(1-pii))
+# DFITS plots to compare with 
+ols_plot_dffits(model)+
+geom_point(y=as.vector(DFITS))
+```
+
+The final measure is Hadis Influence Measure 
+
+```{r}
+
+#r_star  <- ext_studentsized_residuals*sqrt((n-3)/(n-3-ext_studentsized_residuals**2))
+## dd= normalized residuals 
+#dd<- as.numeric( residuals/sqrt(SSE))
+dd2 <- residuals**2/as.numeric(t(residuals)%*%residuals)
+#normalized_residuals <-residuals**2/SSE
+#normalized_residuals <- residuals**2/
+first <- (pii/(1-pii))
+second <- (dd2)/(1-dd2)
+third <- 2/(1-pii)
+H <- first + second*third
+ols_plot_hadi(model) + 
+geom_point(y=as.vector(H))
+
+#plot(as.vector(H))
+```
+
+The second component 
+$$ 
+\frac{p_{ii}}{1-p_{ii}} 
+$$
+is know as the potential and the first part is function of the normalized residuals weighted by the $i^{th}$ leverage values
+$$
+
+$$
+
