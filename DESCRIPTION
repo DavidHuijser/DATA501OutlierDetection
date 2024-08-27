@@ -1,11 +1,21 @@
 Package: OutlierDetection
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Influence Measure
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: David Huijser
+Maintainer: David Huijser <yourself@somewhere.net>
+Description: This package will take a dataframe or a lm-objects and use the 
+    residuals for outlier detection. The user can specify the type of preferred 
+    influence measure. 
+License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+Imports: ggplot2,
+         olsrr
+LazyData: False
+RoxygenNote: 7.3.2
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

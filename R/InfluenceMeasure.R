@@ -1,4 +1,40 @@
+#library(Matrix)
+#library(olsrr)
+#library(ggplot2)
 
+#' InfluenceMeasure
+#'
+#' The function InfluenceMeasure is aimed to identify points of high influence,which
+#' might have a large impact in linear regression.
+#'
+#' @param data either a lm-object or a dataframe, the code expect to both have variables named x and y.
+
+#' @param measure is a string to indicate the type of influence measure to be used:
+#'         "Cooks","DFITS" or "Hadi"
+#'
+#' @param output is string which describes the type of output the user prefers "plot" or "influences".
+#'
+#' @return The functions returns either plot or the influence measures.
+#' @export
+#'
+#' @examples
+#' slope <-  4
+#' offset <- -3
+#' sds <- 7
+#' x <- seq(from = 1, to = 10, length.out= 100)
+#' y <- slope*x + offset
+#  Add regular noise
+#' noise <- rnorm(length(x),sd=2)
+#' y <- y + noise
+#  generate number of outliers
+#' num <- 3
+#' s <- sample(length(x), num)
+#' y[s] <- y[s] +  rnorm(num, sd=sds) + runif(num, -sds,sds)
+#'
+#'
+#' lin_model <- lm(y~x)
+#' InfluenceMeasure(lin_model, measure="Cooks", output = "values")
+#'
 InfluenceMeasure <- function(data, measure, output="plot"){
 
    # Test Input Data Class
@@ -11,32 +47,35 @@ InfluenceMeasure <- function(data, measure, output="plot"){
    if (!(output %in% list("values","plot")))  stop(paste(" Incorrect output argument"))
 
 
-   if (class(data) == "data.frame")  print(" Data 1")
+   # Obtain x and y from the data & determine if input is lm-model or dataframe
+   if (attr(data,"class") == "data.frame")
    {
-     x <- c(lmmodel$model["x"])
-     y <- c(lmmodel$model["y"])
+     x <-data$x
+     y <-data$y
    }
-   if (class(data) == "lm")  print(" Data 2")
-  {
-    x <- df$x
-    y <- df$y
+   else
+   {
+     x <- data$model$x
+     y <- data$model$y
    }
 
+    myInfluenceMeasures  <- calcMeasures(x,y,measure)
 
-   plot(x,y)
-    #first determine if input is lm-model or dataframe
-   if  (measure == "Cooks")  print(" Option 1")
-   if  (measure == "DFFITS")  print(" Option 2")
-   if  (measure == "Hadis")  print(" Option 3")
-
-    print("Hello, world!")
-    print(output)
+    if (output == "values")
+    {
+    return(myInfluenceMeasures)
+    }
+    if (output == "plot")
+    {
+      print("plot not ready")
+      return(myInfluenceMeasures)
+    }
 }
 
 
-InfluenceMeasure(model, measure="Cooks", output = "plot")
-InfluenceMeasure(model, measure="Cooks", output = "values")
-InfluenceMeasure(data, measure="Cooks")
-InfluenceMeasure(2, measure="Cooks")
-InfluenceMeasure(data, measure="Whatever")
-InfluenceMeasure(lmmodel, measure="Cooks", output = "Pickles")
+#InfluenceMeasure(model, measure="Cooks", output = "plot")
+#InfluenceMeasure(model, measure="Cooks", output = "values")
+#InfluenceMeasure(data, measure="Cooks")
+#InfluenceMeasure(2, measure="Cooks")
+#InfluenceMeasure(data, measure="Whatever")
+#InfluenceMeasure(lmmodel, measure="Cooks", output = "Pickles")
