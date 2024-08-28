@@ -9,8 +9,9 @@ Description: This package will take a dataframe or a lm-objects and use the
     influence measure. 
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: ggplot2,
-         olsrr
+Imports: 
+     ggplot2,
+     olsrr
 LazyData: False
 RoxygenNote: 7.3.2
 Suggests: 

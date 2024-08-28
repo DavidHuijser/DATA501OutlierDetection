@@ -35,6 +35,6 @@ y[s] <- y[s] +  rnorm(num, sd=sds) + runif(num, -sds,sds)
 
 
 lin_model <- lm(y~x)
-InfluenceMeasure(lin_model, measure="Cooks", output = "values")
+results <- InfluenceMeasure(lin_model, measure="Hadi", output = "values")
 
 }

@@ -1,7 +1,3 @@
-#library(Matrix)
-#library(olsrr)
-#library(ggplot2)
-
 #' InfluenceMeasure
 #'
 #' The function InfluenceMeasure is aimed to identify points of high influence,which
@@ -33,7 +29,7 @@
 #'
 #'
 #' lin_model <- lm(y~x)
-#' InfluenceMeasure(lin_model, measure="Cooks", output = "values")
+#' results <- InfluenceMeasure(lin_model, measure="Hadi", output = "values")
 #'
 InfluenceMeasure <- function(data, measure, output="plot"){
 
@@ -45,7 +41,6 @@ InfluenceMeasure <- function(data, measure, output="plot"){
 
    # Test output
    if (!(output %in% list("values","plot")))  stop(paste(" Incorrect output argument"))
-
 
    # Obtain x and y from the data & determine if input is lm-model or dataframe
    if (attr(data,"class") == "data.frame")
@@ -67,15 +62,8 @@ InfluenceMeasure <- function(data, measure, output="plot"){
     }
     if (output == "plot")
     {
-      print("plot not ready")
       return(myInfluenceMeasures)
     }
 }
 
 
-#InfluenceMeasure(model, measure="Cooks", output = "plot")
-#InfluenceMeasure(model, measure="Cooks", output = "values")
-#InfluenceMeasure(data, measure="Cooks")
-#InfluenceMeasure(2, measure="Cooks")
-#InfluenceMeasure(data, measure="Whatever")
-#InfluenceMeasure(lmmodel, measure="Cooks", output = "Pickles")
