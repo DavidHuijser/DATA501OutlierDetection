@@ -26,7 +26,4 @@ test_that("The package gives helpful errors for invalid inputs", {
   expect_error(InfluenceMeasure(df, measure="Two Donuts", output = "plot"), "Incorrect measure argument")
   expect_error(InfluenceMeasure(df, measure="Cooks", output = "Nothing"), "Incorrect output argument")
 
-
-
-
   })
