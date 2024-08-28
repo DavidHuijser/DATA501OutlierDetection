@@ -16,5 +16,73 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(OutlierDetection)
+library(ggplot2)
+seed <- 5
 ```
 
+This `R` package aims to provide influence measure for outlier-detection in linear models. The user provides a linear model where variable `x` and `y` are defined. The class of the linear model can be either a `lm`-class object or dataframe.  
+
+Lets look at an example where we generate some linear correlated data with a couple of outliers.
+```{r}
+# 1. Generate data with a few outliers
+slope <-  4
+offset <- -3
+sds <- 7
+x <- seq(from = 1, to = 10, length.out= 100)
+
+y <- slope*x + offset
+
+# Add regular noise
+noise <- rnorm(length(x),sd=2)
+y <- y + noise
+
+# generate number of outliers
+num <- 3
+s <- sample(length(x), num)
+y[s] <- y[s] +  rnorm(num, sd=sds) + runif(num, -sds,sds)
+
+# Create plot
+df <- data.frame(x,y)
+
+ggplot(data=df, aes(x=x, y=y)) +
+geom_point()
+```
+
+```
+
+From the graph you can see there are two outliers, however it is challengeing to determine if we have sufficient reason to impute by just inspecting the graph. Therefore one prefer more solid approach use well-define measures. The user can pick from three types of measures:
+
+- Cooks Distance
+- DFITS
+- Hadi's Influence Measure
+
+The user can also indicate preferred output either a graph or the measures.  
+For the cooks distance and graph
+
+```{r}
+temp <- InfluenceMeasure(df, measure="Cooks", output = "plot")
+
+temp <- InfluenceMeasure(df, measure="Cooks", output = "values")
+
+```
+
+
+The user can also indicate preferred output either a graph or the measures.  
+For the DFITS and graph
+
+```{r}
+temp <- InfluenceMeasure(df, measure="DFITS", output = "plot")
+
+temp <- InfluenceMeasure(df, measure="DFITS", output = "values")
+
+```
+
+The user can also indicate preferred output either a graph or the measures.  
+For the DFITS and graph
+
+```{r}
+temp <- InfluenceMeasure(df, measure="Hadi", output = "plot")
+
+temp <- InfluenceMeasure(df, measure="Hadi", output = "values")
+
+```

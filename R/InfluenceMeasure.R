@@ -58,11 +58,11 @@ InfluenceMeasure <- function(data, measure, output="plot"){
 
     if (output == "values")
     {
-    return(myInfluenceMeasures)
+    return(myInfluenceMeasures$measure)
     }
     if (output == "plot")
     {
-      return(myInfluenceMeasures)
+      return(myInfluenceMeasures$graph)
     }
 }
 
