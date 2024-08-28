@@ -1,0 +1,74 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# OutlierDetection
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of OutlierDetection is to dected Outliers.
+
+## Installation
+
+You can install the development version of OutlierDetection like so:
+
+``` r
+devtools::install_github("DavidHuijser/DATA501LSBETA")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(OutlierDetection)
+slope <-  4
+offset <- -3
+sds <- 7
+x <- seq(from = 1, to = 10, length.out= 100)
+
+y <- slope*x + offset
+
+# Add regular noise
+noise <- rnorm(length(x),sd=2)
+y <- y + noise
+
+# generate number of outliers
+num <- 3
+s <- sample(length(x), num)
+y[s] <- y[s] +  rnorm(num, sd=sds) + runif(num, -sds,sds)
+
+# Create plot
+df <- data.frame(x,y)
+lin_model <- lm(y~x)
+
+
+InfluenceMeasure(lin_model, measure="Cooks", output = "values")
+InfluenceMeasure(lin_model, measure="Cooks", output = "plot")
+
+
+```
+
+<!--
+You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+
+You can also embed plots, for example:
+
+```{r pressure, echo = FALSE}
+plot(pressure)
+```
+
+In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+-->
