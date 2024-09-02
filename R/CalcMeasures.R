@@ -28,9 +28,9 @@ myleastsquare <- function(x,y)
   # Confirm the sum of square residuals of from the LA method are identical to those from the lm-package
   residuals <- y - (slope_estimate*x + offset_estimate)
 
-  sum(residuals**2)
-  my_model$coefficients
-  sum(my_model$residuals**2)
+  #sum(residuals**2)
+  #my_model$coefficients
+  #sum(my_model$residuals**2)
  return(list(res = residuals, offeset=offset_estimate, slope=slope_estimate,leverage=pii))
 }
 
@@ -52,14 +52,14 @@ calcMeasures <- function(x,y, measure)
 
     distance <- (0.5*studentsized_residuals**2)*(pii/(1-pii))
 
-    # threshold
+    # Threshold
     threshold <- 4/n
 
     # Prepare Indices of Values over threshold
     txt <- 1:n
     txt[distance < threshold] = NA
 
-    # Store all in datafrom (easier for ggplot)
+    # Store all in dataframe (easier format for ggplot)
     d <- data.frame(obs=x, cd=distance, txt=txt)
 
     title <- "Cook's Distance Plot"
@@ -71,11 +71,12 @@ calcMeasures <- function(x,y, measure)
       # Add threshold line plot
     gg <-  gg +geom_hline(yintercept = threshold, colour = "red")
 
-      # Add text line plot
+    # Add text line plot
     gg <-  gg + annotate("text", x = Inf, y = Inf, hjust = 1.2, vjust = 2, family = "serif", fontface = "italic", colour = "darkred",
                            label = paste("Threshold:", round(threshold, 3)))
     result <- list(measure=distance, graph=gg)
-    # For check
+
+    # Only for internal check
     # olsrr::ols_plot_cooksd_chart(my_model)
   }
 
@@ -92,7 +93,7 @@ calcMeasures <- function(x,y, measure)
     ext_studentsized_residuals  <- residuals/(SSE_i*sqrt(1-pii))
     distance <- ext_studentsized_residuals*sqrt(pii/(1-pii))
 
-    # threshold
+    # Threshold
     threshold <- round(2*sqrt(2/n),3)
 
 
@@ -127,10 +128,9 @@ calcMeasures <- function(x,y, measure)
                          label = paste("Threshold:", round(threshold, 3)))
     result <- list(measure=distance, graph=gg)
 
-    # For Check
+    # Only for internal check
     #olsrr::ols_plot_dffits(my_model) + ggplot2::geom_point(y=as.vector(distance))
   }
-
 
   if  (measure == "Hadi"){
 
@@ -140,7 +140,7 @@ calcMeasures <- function(x,y, measure)
     # Calculate H
     distance <- (pii/(1-pii)) + (2/(1-pii))*(dd2)/(1-dd2)
 
-    # threshold
+    # Threshold
     threshold <- 2*sqrt(1/n)
 
     # Prepare Indices of Values over threshold
@@ -166,9 +166,8 @@ calcMeasures <- function(x,y, measure)
                          label = paste("Threshold:", round(threshold, 3)))
 
     result <- list(measure=distance, graph=gg)
-    # For Check
-  #  gg
-  #  olsrr::ols_plot_hadi(my_model) + ggplot2::geom_point(y=as.vector(distance))
+    # Only for internal check
+    #  olsrr::ols_plot_hadi(my_model) + ggplot2::geom_point(y=as.vector(distance))
   }
   return(result)
 

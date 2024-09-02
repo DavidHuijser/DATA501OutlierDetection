@@ -25,7 +25,8 @@ The goal of OutlierDetection is to dected Outliers.
 You can install the development version of OutlierDetection like so:
 
 ``` r
-devtools::install_github("DavidHuijser/DATA501LSBETA")
+devtools::install_github("DavidHuijser/DATA501OutlierDetection",build_vignettes=TRUE )
+library()
 ```
 
 ## Example
