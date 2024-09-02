@@ -13,21 +13,58 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+# Disclaimer
+
+This software is part of the DATA501 2024 course taught a Victoria University in Wellington, and is intended for educational purposes only. 
+
 # OutlierDetection
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of OutlierDetection is to dected Outliers.
+The goal of `OutlierDetection` is to calculate measure of influence which helps to user to detect potential outliers.
 
-## Installation
 
-You can install the development version of OutlierDetection like so:
+
+
+## Installation 
+
+You can install the development version of `OutlierDetection` like so:
 
 ``` r
 devtools::install_github("DavidHuijser/DATA501OutlierDetection",build_vignettes=TRUE )
-library()
 ```
+
+Once you successfully installed `OutlierDetection` you can add it to your library using the following command: 
+
+``` r
+library(OutlierDetection)  
+```
+
+## Manual and Vignette 
+
+This allows you to view the general vignette using command:
+
+```r
+browseVignettes("OutlierDetection")
+```
+
+The result of the might be dependent on the specific setup of your computer and `R` environment. 
+
+The function available to the user is `InfluenceMeasure`. In the next section you will see an example, however if you prefer you can find the manual using either 
+
+```r
+?InfluenceMeasure
+```
+or 
+
+```r
+help(InfluenceMeasure)
+```
+
+in the `R` console. 
+
 
 ## Example
 
@@ -62,14 +99,5 @@ InfluenceMeasure(lin_model, measure="Cooks", output = "plot")
 
 ```
 
-<!--
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
 
-You can also embed plots, for example:
 
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
--->
